@@ -1,5 +1,5 @@
 # nsnsotool
-Compress or decompress NSO files for Nintendo Switch.
+Compress or decompress NSO files for Nintendo Switch.  
 Python version, ported from https://github.com/0CBH0/nsnsotool
 
 ## Dependencies

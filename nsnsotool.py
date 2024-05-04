@@ -14,18 +14,9 @@ import lz4.block
 
 
 class NSOfile:
-    def __init__(self, file_path: str, globalInfo = None) -> None:
+    def __init__(self, file_path: str) -> None:
         self.file_path = file_path
         self.Compressed = False
-        if not globalInfo == None:
-            self.logger = globalInfo.logger
-            self.msg_map = globalInfo.msg_map
-            self.msgbox_title_map = globalInfo.msgbox_title_map
-            # self.back_path = globalInfo.back_path
-            # self.tool_path = globalInfo.tool_path
-            self.independent = False
-        else:
-            self.independent = True
         
         # 0x100 bytes
         self.nso_header_fmt = '<4s15I32s3I28s6I32s32s32s'
@@ -203,9 +194,11 @@ class NSOfile:
         
         out_file.close()
         NSOfile(out_path)
+        print("====== Decompression completed ======")
 
     def self_decompress(self):
         if not self.Compressed:
+            print("====== Decompression completed ======")
             return
         
         out_path = self.file_path
@@ -253,9 +246,11 @@ class NSOfile:
 
         out_file.close()
         NSOfile(out_path)
+        print("====== Compression completed ======")
 
     def self_compress(self):
         if self.Compressed:
+            print("====== Compression completed ======")
             return
         
         out_path = self.file_path
@@ -278,8 +273,9 @@ def main():
     parser.add_argument('output_file', type=str, nargs='?', help='Output file path (optional, if not provided, overwrite the input file)')
     args = parser.parse_args()
 
-    if not args.output_file:
+    if args.output_file is None:
         overwrite = True
+        args.output_file = args.input_file
 
     if args.compress:
         print(f'Compressing file: {args.input_file} to {args.output_file}\n')

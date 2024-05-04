@@ -1,0 +1,80 @@
+
+    struct ModuleInfo {
+        u8 module_id[0x20];
+        u64 address;
+        u64 size;
+    };
+    static_assert(sizeof(ModuleInfo) == 0x30);
+
+
+    /* NSO types. */
+    struct NsoHeader {
+        static constexpr u32 Magic = util::FourCC<'N','S','O','0'>::Code;
+        enum Segment : size_t {
+            Segment_Text = 0,
+            Segment_Ro   = 1,
+            Segment_Rw   = 2,
+            Segment_Count,
+        };
+
+        enum Flag : u32 {
+            Flag_CompressedText = (1 << 0),
+            Flag_CompressedRo   = (1 << 1),
+            Flag_CompressedRw   = (1 << 2),
+            Flag_CheckHashText     = (1 << 3),
+            Flag_CheckHashRo       = (1 << 4),
+            Flag_CheckHashRw       = (1 << 5),
+        };
+
+        struct SegmentInfo {
+            u32 file_offset;
+            u32 dst_offset;
+            u32 size;
+            u32 reserved;
+        };
+
+        u32 magic;
+        u32 version;
+        u32 reserved_08;
+        u32 flags;
+        union {
+            struct {
+                u32 text_file_offset;
+                u32 text_dst_offset;
+                u32 text_size;
+                u32 unk_file_offset;
+                u32 ro_file_offset;
+                u32 ro_dst_offset;
+                u32 ro_size;
+                u32 unk_size;
+                u32 rw_file_offset;
+                u32 rw_dst_offset;
+                u32 rw_size;
+                u32 bss_size;
+            };
+            SegmentInfo segments[Segment_Count];
+        };
+        u8 module_id[sizeof(ModuleInfo::module_id)];
+        union {
+            u32 compressed_sizes[Segment_Count];
+            struct {
+                u32 text_compressed_size;
+                u32 ro_compressed_size;
+                u32 rw_compressed_size;
+            };
+        };
+        u8 reserved_6C[0x34];
+        union {
+            u8 segment_hashes[Segment_Count][crypto::Sha256Generator::HashSize];
+            struct {
+                u8 text_hash[crypto::Sha256Generator::HashSize];
+                u8 ro_hash[crypto::Sha256Generator::HashSize];
+                u8 rw_hash[crypto::Sha256Generator::HashSize];
+            };
+        };
+    };
+    static_assert(sizeof(NsoHeader) == 0x100 && util::is_pod<NsoHeader>::value, "NsoHeader definition!");
+
+
+
+
